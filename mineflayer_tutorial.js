@@ -1,0 +1,1 @@
+const mineflayer = require("mineflayer");
