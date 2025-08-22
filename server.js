@@ -5,7 +5,8 @@ const app = express();
 app.use(express.json());
 const port = 3000;
 
-let altProcesses = {};
+const altProcesses = {};
+const onlineAlts = new Set();
 
 // config is like this so info isn't public
 import dotenv from "dotenv";
@@ -30,19 +31,48 @@ const altsConfig = {
 	},
 };
 
+const handleChildOutput = (data) => {
+	const output = data.toString().trim();
+	try {
+		const eventData = JSON.parse(output);
+		const altName = eventData.alt;
+		if (eventData.type === "login") {
+			console.log(`${altName} logged in successfully`);
+			onlineAlts.add(altName);
+		} else if (eventData.type === "disconnect") {
+			console.log(`${altName} disconnected from the server`);
+			onlineAlts.delete(altName);
+		} else if (eventData.type === "kicked") {
+			const kickReason = eventData.reason;
+			console.log(
+				`${altName} was kicked from the server for ${kickReason}`
+			);
+		}
+	} catch (error) {
+		console.error(error);
+	}
+};
+
 const connectAlt = (altName, res) => {
 	console.log(`starting script for alt ${altName}`);
 	const child = spawn("node", ["alt_logic.js"], {
 		env: {
 			USER: altsConfig[altName].username,
 			PASSWORD: altsConfig[altName].password,
+			ALT: altName,
 		},
 	});
 	altProcesses[altName] = child;
-	child.stdout.on("data", (data) => console.log(`[${altName}]: ${data}`));
+	child.stdout.on("data", (data) => handleChildOutput(data));
 	child.stderr.on("data", (data) =>
 		console.error(`[${altName} ERROR]: ${data}`)
 	);
+	child.on("exit", () => {
+		if (onlineAlts.has(altName)) {
+			console.log(`${altName} disconnected from the server`);
+			onlineAlts.delete(altName);
+		}
+	});
 };
 
 const disconnectAlt = (altName, res) => {
@@ -83,6 +113,11 @@ app.post("/send/:altName", (req, res) => {
 			error: `${altName} isn't online (did you connect it yet?)`,
 		});
 	}
+});
+
+app.get("/status", (req, res) => {
+	const onlineList = Array.from(onlineAlts);
+	res.status(200).json({ online: onlineList });
 });
 
 app.listen(port);

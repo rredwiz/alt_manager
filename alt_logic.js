@@ -1,9 +1,12 @@
 import mineflayer from "mineflayer";
 
+const USER = process.env.USER;
+const ALT = process.env.ALT;
+
 const options = {
 	host: "donutsmp.net",
 	auth: "microsoft",
-	username: process.env.USER,
+	username: USER,
 	version: "1.20.4",
 };
 
@@ -12,7 +15,6 @@ let alt = null;
 process.stdin.on("data", (data) => {
 	if (alt) {
 		const message = data.toString().trim();
-		console.log(`bot sent this message to the server: ${message}`);
 		alt.chat(message);
 	}
 });
@@ -20,19 +22,32 @@ process.stdin.on("data", (data) => {
 alt = mineflayer.createBot(options);
 
 alt.on("login", () => {
-	console.log(`logged in as ${alt.username}`);
+	const loginData = {
+		type: "login",
+		alt: ALT,
+	};
+	process.stdout.write(JSON.stringify(loginData) + "\n");
 });
 
 alt.on("spawn", () => {});
 
 alt.on("kicked", (reason) => {
-	console.log(`bot was kicked for reason: ${reason}`);
+	const kickedData = {
+		type: "kicked",
+		reason: reason,
+		alt: ALT,
+	};
+	process.stdout.write(JSON.stringify(kickedData) + "\n");
 });
 
-alt.on("error", () => {
-	console.log("error happened lols");
+alt.on("error", (error) => {
+	console.error(`Bot responded with error: ${error}`);
 });
 
 alt.on("end", () => {
-	console.log("bot disconnected, process finished");
+	const disconnectedData = {
+		type: "disconnect",
+		alt: ALT,
+	};
+	process.stdout.write(JSON.stringify(disconnectedData) + "\n");
 });

@@ -109,6 +109,23 @@ async function sendMessage(message) {
 	}
 }
 
+async function handleStatus(message) {
+	const args = message.content.split(" ");
+	if (args.length > 1) {
+		return message.reply(
+			"You provided too many arguments. Usage: '>status'."
+		);
+	}
+	try {
+		const response = await fetch(`${MANAGER_SERVER_URL}/status`);
+		const data = await response.json();
+		const onlineList = data.online;
+		message.reply(`online alts: ${onlineList}`);
+	} catch (error) {
+		console.error(error);
+	}
+}
+
 client.on("messageCreate", async (message) => {
 	if (message.author.bot) return;
 
@@ -117,6 +134,8 @@ client.on("messageCreate", async (message) => {
 	if (message.content.startsWith(">disconnect")) disconnectAlt(message);
 
 	if (message.content.startsWith(">send")) sendMessage(message);
+
+	if (message.content.startsWith(">status")) handleStatus(message);
 });
 
 client.login(TOKEN);
