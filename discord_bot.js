@@ -12,7 +12,6 @@ const client = new Client({
 });
 
 import dotenv from "dotenv";
-import { json } from "express";
 dotenv.config();
 const TOKEN = process.env.DISCORD_BOT_TOKEN;
 
@@ -42,15 +41,49 @@ async function connectAlt(message) {
 		const text = await response.text();
 		if (text) {
 			console.log(text);
-			console.log("command successfully started the bot");
+			console.log(`connect command successfully started ${altName}`);
+			return message.reply(`${altName} successfully connected.`);
 		}
+		return message.reply(
+			`${altName} sucessfully connected but response text was null.`
+		);
 	} catch (error) {
 		console.log(error);
 	}
 }
 
-//TODO:
-// attempts to send a message (or command) via the alt specified in the user's message
+async function disconnectAlt(message) {
+	const args = message.content.split(" ");
+	if (args.length < 2) {
+		return message.reply(
+			"You provided too few arguments. Usage: '>disconnect {alt number}' Example: '>disconnect alt1'."
+		);
+	} else if (args.length > 2) {
+		return message.reply(
+			"You provided too many arguments. Usage: '>disconnect {alt number}' Example: '>disconnect alt1'."
+		);
+	}
+	const altName = args[1];
+	try {
+		const response = await fetch(
+			`${MANAGER_SERVER_URL}/disconnect/${altName}`
+		);
+		const text = await response.text();
+		if (text) {
+			console.log(text);
+			console.log(
+				`disconnect command successfully disconnected ${altName}`
+			);
+			return message.reply(`${altName} successfully disconnected.`);
+		}
+		return message.reply(
+			`${altName} successfully connected but response text was null.`
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
 async function sendMessage(message) {
 	const args = message.content.split(" ");
 	if (args.length < 3) {
@@ -79,13 +112,11 @@ async function sendMessage(message) {
 client.on("messageCreate", async (message) => {
 	if (message.author.bot) return;
 
-	if (message.content.startsWith(">connect")) {
-		connectAlt(message);
-	}
+	if (message.content.startsWith(">connect")) connectAlt(message);
 
-	if (message.content.startsWith(">send")) {
-		sendMessage(message);
-	}
+	if (message.content.startsWith(">disconnect")) disconnectAlt(message);
+
+	if (message.content.startsWith(">send")) sendMessage(message);
 });
 
 client.login(TOKEN);

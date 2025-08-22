@@ -23,9 +23,7 @@ alt.on("login", () => {
 	console.log(`logged in as ${alt.username}`);
 });
 
-alt.on("spawn", () => {
-	// idk yet
-});
+alt.on("spawn", () => {});
 
 alt.on("kicked", (reason) => {
 	console.log(`bot was kicked for reason: ${reason}`);

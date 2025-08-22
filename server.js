@@ -30,7 +30,7 @@ const altsConfig = {
 	},
 };
 
-const connectAlt = (altName) => {
+const connectAlt = (altName, res) => {
 	console.log(`starting script for alt ${altName}`);
 	const child = spawn("node", ["alt_logic.js"], {
 		env: {
@@ -45,6 +45,18 @@ const connectAlt = (altName) => {
 	);
 };
 
+const disconnectAlt = (altName, res) => {
+	const childProcess = altProcesses[altName];
+	if (childProcess) {
+		childProcess.kill();
+		delete childProcess[altName];
+		console.log(`killed the process for ${altName}`);
+		res.status(200).send(`${altName} was disconnected successfully`);
+	} else {
+		res.status(404).send(`${altName} is not currently running`);
+	}
+};
+
 const sendMessage = (altName, message, res) => {
 	altProcesses[altName].stdin.write(`${message}\n`);
 	res.status(200).json({ message: message });
@@ -52,9 +64,12 @@ const sendMessage = (altName, message, res) => {
 
 app.get("/connect/:altName", (req, res) => {
 	const altName = req.params.altName;
-	if (altsConfig[altName]) {
-		connectAlt(altName);
-	}
+	if (altsConfig[altName]) connectAlt(altName, res);
+});
+
+app.get("/disconnect/:altName", (req, res) => {
+	const altName = req.params.altName;
+	if (altsConfig[altName]) disconnectAlt(altName, res);
 });
 
 app.post("/send/:altName", (req, res) => {
