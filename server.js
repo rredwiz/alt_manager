@@ -2,6 +2,7 @@ import express from "express";
 import { spawn } from "child_process";
 
 const app = express();
+app.use(express.json());
 const port = 3000;
 
 let altProcesses = {};
@@ -29,9 +30,7 @@ const altsConfig = {
 	},
 };
 
-const altAction = (altName) => {
-	// do something
-	// by default im just testing, so im gonna make an alt connect
+const connectAlt = (altName) => {
 	console.log(`starting script for alt ${altName}`);
 	const child = spawn("node", ["alt_logic.js"], {
 		env: {
@@ -46,10 +45,28 @@ const altAction = (altName) => {
 	);
 };
 
-app.get("/manager/:altName", (req, res) => {
+const sendMessage = (altName, message, res) => {
+	altProcesses[altName].stdin.write(`${message}\n`);
+	res.status(200).json({ message: message });
+};
+
+app.get("/connect/:altName", (req, res) => {
 	const altName = req.params.altName;
 	if (altsConfig[altName]) {
-		altAction(altName);
+		connectAlt(altName);
+	}
+});
+
+app.post("/send/:altName", (req, res) => {
+	const altName = req.params.altName;
+	const message = req.body.message;
+	console.log(`message received from post was: ${message}`);
+	if (altProcesses[altName]) {
+		sendMessage(altName, message, res);
+	} else {
+		return res.status(400).json({
+			error: `${altName} isn't online (did you connect it yet?)`,
+		});
 	}
 });
 

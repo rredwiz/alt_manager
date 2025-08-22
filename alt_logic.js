@@ -7,7 +7,17 @@ const options = {
 	version: "1.20.4",
 };
 
-const alt = mineflayer.createBot(options);
+let alt = null;
+
+process.stdin.on("data", (data) => {
+	if (alt) {
+		const message = data.toString().trim();
+		console.log(`bot sent this message to the server: ${message}`);
+		alt.chat(message);
+	}
+});
+
+alt = mineflayer.createBot(options);
 
 alt.on("login", () => {
 	console.log(`logged in as ${alt.username}`);

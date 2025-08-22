@@ -12,6 +12,7 @@ const client = new Client({
 });
 
 import dotenv from "dotenv";
+import { json } from "express";
 dotenv.config();
 const TOKEN = process.env.DISCORD_BOT_TOKEN;
 
@@ -22,7 +23,7 @@ client.on("clientReady", async () => {
 });
 
 // attempts to connect the alt specified in the user's message
-async function connectAlt() {
+async function connectAlt(message) {
 	const args = message.content.split(" ");
 	if (args.length < 2) {
 		return message.reply(
@@ -36,7 +37,7 @@ async function connectAlt() {
 	const altName = args[1];
 	try {
 		const response = await fetch(
-			`${MANAGER_SERVER_URL}/manager/${altName}`
+			`${MANAGER_SERVER_URL}/connect/${altName}`
 		);
 		const text = await response.text();
 		if (text) {
@@ -50,12 +51,28 @@ async function connectAlt() {
 
 //TODO:
 // attempts to send a message (or command) via the alt specified in the user's message
-async function sendMessage() {
+async function sendMessage(message) {
 	const args = message.content.split(" ");
 	if (args.length < 3) {
 		return message.reply(
 			"You provided too few arguments. Usage: '>send {alt number} {message}' Example: '>send alt1 /home 1'. Other example: '>send alt2 hello world!'"
 		);
+	}
+	const altName = args[1];
+	const messageToSend = args.slice(2).join(" ");
+	try {
+		const response = await fetch(`${MANAGER_SERVER_URL}/send/${altName}`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ message: messageToSend }),
+		});
+		console.log(`messageToSend (post body was): ${messageToSend}`);
+		const data = await response.json();
+		message.reply(`${altName} sent message: ${data.message}`);
+	} catch (error) {
+		console.error(error);
 	}
 }
 
