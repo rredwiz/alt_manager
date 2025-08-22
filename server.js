@@ -11,29 +11,46 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const altsConfig = {
-	redwizalt1: {
+	alt1: {
 		username: process.env.ALT_1_USER,
 		password: process.env.ALT_1_PASSWORD,
 	},
-	redwizalt3: {
+	alt2: {
 		username: process.env.ALT_2_USER,
 		password: process.env.ALT_2_PASSWORD,
+	},
+	alt3: {
+		username: process.env.ALT_3_USER,
+		password: process.env.ALT_3_PASSWORD,
+	},
+	alt4: {
+		username: process.env.ALT_4_USER,
+		password: process.env.ALT_4_PASSWORD,
 	},
 };
 
 const altAction = (altName) => {
-	if (!altProcesses[altName]) {
-		console.log(
-			`${altName} is not running right now! Can't perform action.`
-		);
-		return;
-	}
 	// do something
+	// by default im just testing, so im gonna make an alt connect
+	console.log(`starting script for alt ${altName}`);
+	const child = spawn("node", ["alt_logic.js"], {
+		env: {
+			USER: altsConfig[altName].username,
+			PASSWORD: altsConfig[altName].password,
+		},
+	});
+	altProcesses[altName] = child;
+	child.stdout.on("data", (data) => console.log(`[${altName}]: ${data}`));
+	child.stderr.on("data", (data) =>
+		console.error(`[${altName} ERROR]: ${data}`)
+	);
 };
 
-app.get("/reconnect/:altName", (req, res) => {
+app.get("/manager/:altName", (req, res) => {
 	const altName = req.params.altName;
 	if (altsConfig[altName]) {
-		altAction();
+		altAction(altName);
 	}
 });
+
+app.listen(port);

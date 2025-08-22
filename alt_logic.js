@@ -3,19 +3,18 @@ import mineflayer from "mineflayer";
 const options = {
 	host: "donutsmp.net",
 	auth: "microsoft",
-	username: process.env.ALT_1_USER,
-	password: process.env.ALT_1_PASSWORD,
-	version: "1.21.7",
+	username: process.env.USER,
+	version: "1.20.4",
 };
 
 const alt = mineflayer.createBot(options);
 
 alt.on("login", () => {
-	console.log("logged in as");
+	console.log(`logged in as ${alt.username}`);
 });
 
 alt.on("spawn", () => {
-	// redwizalt1.chat("hi");
+	// idk yet
 });
 
 alt.on("kicked", (reason) => {
