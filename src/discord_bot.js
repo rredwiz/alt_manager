@@ -21,7 +21,6 @@ client.on("clientReady", async () => {
 	console.log("discord bot is logged in");
 });
 
-// attempts to connect the alt specified in the user's message
 async function connectAlt(message) {
 	const args = message.content.split(" ");
 	if (args.length < 2) {

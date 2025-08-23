@@ -54,19 +54,19 @@ const handleChildOutput = (data) => {
 };
 
 const connectAlt = (altName, res) => {
-	console.log(`starting script for alt ${altName}`);
+	console.log(`starting script for ${altName}`);
 	const child = spawn("node", ["alt_logic.js"], {
 		env: {
 			USER: altsConfig[altName].username,
 			PASSWORD: altsConfig[altName].password,
 			ALT: altName,
+			TRUSTED_USERS: process.env.TRUSTED_USERS,
 		},
 	});
 	altProcesses[altName] = child;
+	res.status(200).send(`${altName} was connected successfully`);
 	child.stdout.on("data", (data) => handleChildOutput(data));
-	child.stderr.on("data", (data) =>
-		console.error(`[${altName} ERROR]: ${data}`)
-	);
+	child.stderr.on("data", (data) => console.error(`[${altName}]: ${data}`));
 	child.on("exit", () => {
 		if (onlineAlts.has(altName)) {
 			console.log(`${altName} disconnected from the server`);
