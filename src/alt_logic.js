@@ -45,22 +45,22 @@ alt.once("spawn", () => {
 });
 
 alt.on("chat:tpaRequest", (matches) => {
-	const username = matches[0].toString();
-	console.error(`tpa request was sent by ${username}`);
+	const username = matches[0].toString().toLowerCase();
+	process.stderr.write(`tpa request was sent by ${username}\n`);
 
 	if (trustedUsers.has(username)) {
-		// we get a random delay between 1000 - 1200 milliseconds to not cause suspicion of bots to the server
-		const randomDelay = Math.floor(Math.random() * 201) + 1000;
+		// we get a random delay between 1000 - 1500 milliseconds to not cause as much suspicion
+		const randomDelay = Math.floor(Math.random() * 501) + 1000;
 
-		console.error(
-			`trusted user, accepting tpa request from ${username} with random delay ${randomDelay}`
+		process.stderr.write(
+			`trusted user, accepting tpa request from ${username} with random delay ${randomDelay}\n`
 		);
 		setTimeout(() => {
 			alt.chat(`/tpaccept ${username}`);
 		}, randomDelay);
 	} else {
-		console.error(
-			`${username} did not match trusted users, request was not accepted`
+		process.stderr.write(
+			`${username} did not match trusted users, request was not accepted\n`
 		);
 	}
 });
@@ -75,7 +75,7 @@ alt.on("kicked", (reason) => {
 });
 
 alt.on("error", (error) => {
-	console.error(`Bot responded with error: ${error}`);
+	process.stderr.write(`bot responded with error: ${error}\n`);
 });
 
 alt.on("end", () => {
