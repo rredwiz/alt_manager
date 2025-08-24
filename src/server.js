@@ -55,9 +55,9 @@ const handleChildOutput = (data) => {
 
 const connectAlt = (altName, res) => {
 	console.log(`starting script for ${altName}`);
-	if (altProcesses[altName]) {
-		res.status(400).send(`${altName} is already online`);
-		console.log(`script is already running for ${altName}!`);
+	if (onlineAlts.has(altName)) {
+		res.status(400).send(`${altName} is already online, not starting`);
+		console.log(`alt is already online${altName}!`);
 	} else {
 		const child = spawn("node", ["alt_logic.js"], {
 			env: {
@@ -75,7 +75,9 @@ const connectAlt = (altName, res) => {
 		);
 		child.on("exit", () => {
 			if (onlineAlts.has(altName)) {
-				console.log(`${altName} disconnected from the server`);
+				console.log(
+					`${altName} disconnected from the server forcefully, deleting from onlineAlts`
+				);
 				onlineAlts.delete(altName);
 			}
 		});
