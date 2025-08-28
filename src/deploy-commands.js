@@ -1,15 +1,16 @@
+// run this whenever you need to deploy new commands
+
 import {
 	REST,
 	Routes,
 	SlashCommandBuilder,
 	PermissionFlagsBits,
 } from "discord.js";
-
-const clientId = "1406148352051249202";
-const guildId = "1171604341585608745";
-
 import dotenv from "dotenv";
 dotenv.config();
+
+const clientId = "1406148352051249202";
+const guildId = "1403758662140563496";
 const token = process.env.DISCORD_BOT_TOKEN;
 
 // commands go here

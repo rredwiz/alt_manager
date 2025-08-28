@@ -5,6 +5,10 @@ const ALT = process.env.ALT;
 
 // we use the 'or' check in case .env is empty
 const trustedUsersString = process.env.TRUSTED_USERS || "";
+if (!trustedUsersString)
+	process.stderr.write(
+		`You have no trusted users, bot will never accept teleports automatically from anyone!`
+	);
 
 const trustedUsers = new Set(trustedUsersString.split(","));
 
@@ -18,6 +22,7 @@ const options = {
 let alt = null;
 
 // alt input handling for chatting (basically just chats whatever it's given rn)
+// ill probably make this a json object later but im lazy
 process.stdin.on("data", (data) => {
 	if (alt) {
 		const message = data.toString().trim();
@@ -46,7 +51,7 @@ alt.once("spawn", () => {
 
 alt.on("chat:tpaRequest", (matches) => {
 	const username = matches[0].toString().toLowerCase();
-	process.stderr.write(`tpa request was sent by ${username}`);
+	process.stderr.write(`tpa request was sent by ${username}\n`);
 
 	if (trustedUsers.has(username)) {
 		// we get a random delay between 1000 - 1700 milliseconds to not cause as much suspicion

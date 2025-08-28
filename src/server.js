@@ -1,5 +1,8 @@
 import express from "express";
 import { spawn } from "child_process";
+import dotenv from "dotenv";
+dotenv.config();
+import "./logger.js";
 
 const app = express();
 app.use(express.json());
@@ -9,9 +12,6 @@ const altProcesses = {};
 const onlineAlts = new Set();
 
 // config is like this so info isn't public
-import dotenv from "dotenv";
-dotenv.config();
-
 const altsConfig = {
 	alt1: {
 		username: process.env.ALT_1_USER,
@@ -70,10 +70,12 @@ const connectAlt = (altName, res) => {
 			},
 		});
 		altProcesses[altName] = child;
+
+		// we treat child output as formatted json responses
 		child.stdout.on("data", (data) => handleChildOutput(data, res));
-		child.stderr.on("data", (data) =>
-			console.error(`[${altName}]: ${data}`)
-		);
+		// we're using errors as general status messages
+		child.stderr.on("data", (data) => console.log(`[${altName}]: ${data}`));
+
 		child.on("exit", () => {
 			if (onlineAlts.has(altName)) {
 				console.log(
@@ -115,8 +117,10 @@ app.get("/disconnect/:altName", (req, res) => {
 app.post("/send/:altName", (req, res) => {
 	const altName = req.params.altName;
 	const message = req.body.message;
-	console.log(`message received from post was: ${message}`);
 	if (altProcesses[altName]) {
+		console.log(
+			`${altName} is sending a message to the server: ${message}`
+		);
 		sendMessage(altName, message, res);
 	} else {
 		return res.status(400).json({
