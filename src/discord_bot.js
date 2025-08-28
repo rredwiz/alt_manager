@@ -21,18 +21,11 @@ client.on("clientReady", async () => {
 	console.log("discord bot is logged in");
 });
 
-async function connectAlt(message) {
-	const args = message.content.split(" ");
-	if (args.length < 2) {
-		return message.reply(
-			"You provided too few arguments. Usage: '>connect {alt number}' Example: '>connect alt1'"
-		);
-	} else if (args.length > 2) {
-		return message.reply(
-			"You provided too many arguments. Usage: '>connect {alt number}' Example: '>connect alt1'"
-		);
-	}
-	const altName = args[1];
+async function connectAlt(interaction) {
+	const altName = interaction.options.getString("alt-name");
+	await interaction.reply({
+		content: `Connecting ${altName} to the server...`,
+	});
 	try {
 		const response = await fetch(
 			`${MANAGER_SERVER_URL}/connect/${altName}`
@@ -41,28 +34,24 @@ async function connectAlt(message) {
 		if (text) {
 			console.log(text);
 			console.log(`connect command successfully started ${altName}`);
-			return message.reply(`${altName} successfully connected.`);
+			return interaction.editReply(text);
 		}
-		return message.reply(
-			`${altName} sucessfully connected but response text was null.`
+		return interaction.editReply(
+			`${altName} successfully connected but response text was null.`
 		);
 	} catch (error) {
 		console.log(error);
+		return interaction.editReply(
+			`Something went wrong, ${altName} failed to connect (check console).`
+		);
 	}
 }
 
-async function disconnectAlt(message) {
-	const args = message.content.split(" ");
-	if (args.length < 2) {
-		return message.reply(
-			"You provided too few arguments. Usage: '>disconnect {alt number}' Example: '>disconnect alt1'."
-		);
-	} else if (args.length > 2) {
-		return message.reply(
-			"You provided too many arguments. Usage: '>disconnect {alt number}' Example: '>disconnect alt1'."
-		);
-	}
-	const altName = args[1];
+async function disconnectAlt(interaction) {
+	const altName = interaction.options.getString("alt-name");
+	await interaction.reply({
+		content: `Disconnecting ${altName} from the server...`,
+	});
 	try {
 		const response = await fetch(
 			`${MANAGER_SERVER_URL}/disconnect/${altName}`
@@ -70,28 +59,25 @@ async function disconnectAlt(message) {
 		const text = await response.text();
 		if (text) {
 			console.log(text);
-			console.log(
-				`disconnect command successfully disconnected ${altName}`
-			);
-			return message.reply(`${altName} successfully disconnected.`);
+			return interaction.editReply(text);
 		}
-		return message.reply(
-			`${altName} successfully connected but response text was null.`
+		return interaction.editReply(
+			`${altName} successfully disconnected but response text was null.`
 		);
 	} catch (error) {
 		console.log(error);
+		return interaction.editReply(
+			`Something went wrong, ${altName} failed to disconnect (check console).`
+		);
 	}
 }
 
-async function sendMessage(message) {
-	const args = message.content.split(" ");
-	if (args.length < 3) {
-		return message.reply(
-			"You provided too few arguments. Usage: '>send {alt number} {message}' Example: '>send alt1 /home 1'. Other example: '>send alt2 hello world!'"
-		);
-	}
-	const altName = args[1];
-	const messageToSend = args.slice(2).join(" ");
+async function sendMessage(interaction) {
+	const altName = interaction.options.getString("alt-name");
+	const messageToSend = interaction.options.getString("send");
+	await interaction.reply({
+		content: `Attempting to make ${altName} send message: ${messageToSend}...`,
+	});
 	try {
 		const response = await fetch(`${MANAGER_SERVER_URL}/send/${altName}`, {
 			method: "POST",
@@ -100,41 +86,42 @@ async function sendMessage(message) {
 			},
 			body: JSON.stringify({ message: messageToSend }),
 		});
-		console.log(`messageToSend (post body was): ${messageToSend}`);
 		const data = await response.json();
-		message.reply(`${altName} sent message: ${data.message}`);
+		interaction.editReply(
+			`${altName} successfully sent message: ${data.message}`
+		);
 	} catch (error) {
 		console.error(error);
+		interaction.editReply(
+			`An error occurred, ${altName} could not send "${messageToSend}"`
+		);
 	}
 }
 
-async function handleStatus(message) {
-	const args = message.content.split(" ");
-	if (args.length > 1) {
-		return message.reply(
-			"You provided too many arguments. Usage: '>status'."
-		);
-	}
+async function handleStatus(interaction) {
+	await interaction.reply({ content: `Retrieving alt status...` });
 	try {
 		const response = await fetch(`${MANAGER_SERVER_URL}/status`);
 		const data = await response.json();
 		const onlineList = data.online;
-		message.reply(`online alts: ${onlineList}`);
+		interaction.editReply(`Online alts: ${onlineList}`);
 	} catch (error) {
 		console.error(error);
+		interaction.editReply(
+			`An error occurred, couldn't retrieve alt status.`
+		);
 	}
 }
 
-client.on("messageCreate", async (message) => {
-	if (message.author.bot) return;
+client.on("interactionCreate", async (interaction) => {
+	if (!interaction.isChatInputCommand()) return;
 
-	if (message.content.startsWith(">connect")) connectAlt(message);
+	const { commandName } = interaction;
 
-	if (message.content.startsWith(">disconnect")) disconnectAlt(message);
-
-	if (message.content.startsWith(">send")) sendMessage(message);
-
-	if (message.content.startsWith(">status")) handleStatus(message);
+	if (commandName === "start-alt") await connectAlt(interaction);
+	if (commandName === "stop-alt") await disconnectAlt(interaction);
+	if (commandName === "status") await handleStatus(interaction);
+	if (commandName === "send-text") await sendMessage(interaction);
 });
 
 client.login(TOKEN);

@@ -31,13 +31,15 @@ const altsConfig = {
 	},
 };
 
-const handleChildOutput = (data) => {
+const handleChildOutput = (data, res) => {
 	const output = data.toString().trim();
+	console.log(`output recieved from an alt: ${output}`);
 	try {
 		const eventData = JSON.parse(output);
 		const altName = eventData.alt;
 		if (eventData.type === "login") {
 			console.log(`${altName} logged in successfully`);
+			res.status(200).send(`${altName} was connected successfully.`);
 			onlineAlts.add(altName);
 		} else if (eventData.type === "disconnect") {
 			console.log(`${altName} disconnected from the server`);
@@ -54,10 +56,10 @@ const handleChildOutput = (data) => {
 };
 
 const connectAlt = (altName, res) => {
-	console.log(`starting script for ${altName}`);
+	console.log(`Starting script for ${altName}.`);
 	if (onlineAlts.has(altName)) {
-		res.status(400).send(`${altName} is already online, not starting`);
-		console.log(`alt is already online${altName}!`);
+		res.status(400).send(`${altName} is already online!`);
+		console.log(`Tried to start ${altName}, but it is already online!`);
 	} else {
 		const child = spawn("node", ["alt_logic.js"], {
 			env: {
@@ -68,15 +70,14 @@ const connectAlt = (altName, res) => {
 			},
 		});
 		altProcesses[altName] = child;
-		res.status(200).send(`${altName} was connected successfully`);
-		child.stdout.on("data", (data) => handleChildOutput(data));
+		child.stdout.on("data", (data) => handleChildOutput(data, res));
 		child.stderr.on("data", (data) =>
 			console.error(`[${altName}]: ${data}`)
 		);
 		child.on("exit", () => {
 			if (onlineAlts.has(altName)) {
 				console.log(
-					`${altName} disconnected from the server forcefully, deleting from onlineAlts`
+					`${altName} disconnected from the server forcefully, deleting from onlineAlts.`
 				);
 				onlineAlts.delete(altName);
 			}
