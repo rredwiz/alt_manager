@@ -17,8 +17,8 @@ const token = process.env.DISCORD_BOT_TOKEN;
 const commands = [
 	new SlashCommandBuilder()
 		.setName("status")
-		.setDescription("Returns a list of the alts that are online.")
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+		.setDescription("Returns a list of the alts that are online."),
+	// .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	new SlashCommandBuilder()
 		.setName("start-alt")
 		.setDescription("Starts a specific alt.")
@@ -29,8 +29,8 @@ const commands = [
 					"The name of the alt to start (alt1, alt2, etc...)."
 				)
 				.setRequired(true)
-		)
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+		),
+	// .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	new SlashCommandBuilder()
 		.setName("stop-alt")
 		.setDescription("Stops a specific alt.")
@@ -41,8 +41,8 @@ const commands = [
 					"The name of the alt to stop (alt1, alt2, etc...)."
 				)
 				.setRequired(true)
-		)
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+		),
+	// .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	new SlashCommandBuilder()
 		.setName("send-text")
 		.setDescription("Make a specified alt send a message or command.")
@@ -61,8 +61,8 @@ const commands = [
 					"The output text you want to send to the server (can be any message or command)."
 				)
 				.setRequired(true)
-		)
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+		),
+	// .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 ].map((command) => command.toJSON());
 
 const rest = new REST({ version: "10" }).setToken(token);
