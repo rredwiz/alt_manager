@@ -1,8 +1,17 @@
 import mineflayer from "mineflayer";
+import mcprotocol from "minecraft-protocol";
+import socks from "socks";
 
 const USER = process.env.USER;
 const PASSWORD = process.env.PASSWORD;
 const ALT = process.env.ALT;
+const PROXY_USER = process.env.PROXY_USER;
+const PROXY_PASSWORD = process.env.PROXY_PASSWORD;
+const PROXY_HOST = process.env.PROXY_HOST;
+const PROXY_PORT = Number(process.env.PROXY_PORT);
+const SERVER_HOST = "donutsmp.net";
+const SERVER_PORT = 25565;
+const MC_VERSION = "1.19.3";
 
 // we use the 'or' check in case .env is empty
 const trustedUsersString = process.env.TRUSTED_USERS || "";
@@ -13,12 +22,46 @@ if (!trustedUsersString)
 
 const trustedUsers = new Set(trustedUsersString.split(","));
 
-const options = {
-	host: "donutsmp.net",
-	auth: "microsoft",
+const client = mcprotocol.createClient({
+	host: SERVER_HOST,
+	port: SERVER_PORT,
 	username: USER,
 	password: PASSWORD,
-	version: "1.19.3",
+	version: MC_VERSION,
+	auth: "microsoft",
+	connect: (client) => {
+		socks.SocksClient.createConnection(
+			{
+				proxy: {
+					type: 5,
+					userId: PROXY_USER,
+					password: PROXY_PASSWORD,
+					host: PROXY_HOST,
+					port: PROXY_PORT,
+				},
+				command: "connect",
+				destination: {
+					host: SERVER_HOST,
+					port: SERVER_PORT,
+				},
+			},
+			(err, info) => {
+				if (err) {
+					process.stderr.write(`SOCKS connection error: ${err}`);
+					client.emit("error", err);
+					return;
+				}
+
+				process.stderr.write(`SOCKS tunnel established, connecting...`);
+				client.setSocket(info.socket);
+				client.emit("connect");
+			}
+		);
+	},
+});
+
+const options = {
+	client: client,
 };
 
 let alt = null;

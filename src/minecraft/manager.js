@@ -49,6 +49,10 @@ const connectAlt = (altName, res) => {
 				PASSWORD: altsConfig[altName].password,
 				ALT: altName,
 				TRUSTED_USERS: process.env.TRUSTED_USERS,
+				PROXY_USER: altsConfig[altName].proxy.username,
+				PROXY_PASSWORD: altsConfig[altName].proxy.password,
+				PROXY_HOST: altsConfig[altName].proxy.host,
+				PROXY_PORT: altsConfig[altName].proxy.port,
 			},
 		});
 		altProcesses[altName] = child;
