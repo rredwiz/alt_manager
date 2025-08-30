@@ -1,8 +1,8 @@
 import express from "express";
 import { spawn } from "child_process";
 import dotenv from "dotenv";
-dotenv.config();
-import "./logger.js";
+dotenv.config({ path: "../../.env" });
+import "../discord/logger.js";
 
 const app = express();
 app.use(express.json());
@@ -11,25 +11,7 @@ const port = 3000;
 const altProcesses = {};
 const onlineAlts = new Set();
 
-// config is like this so info isn't public
-const altsConfig = {
-	alt1: {
-		username: process.env.ALT_1_USER,
-		password: process.env.ALT_1_PASSWORD,
-	},
-	alt2: {
-		username: process.env.ALT_2_USER,
-		password: process.env.ALT_2_PASSWORD,
-	},
-	alt3: {
-		username: process.env.ALT_3_USER,
-		password: process.env.ALT_3_PASSWORD,
-	},
-	alt4: {
-		username: process.env.ALT_4_USER,
-		password: process.env.ALT_4_PASSWORD,
-	},
-};
+import altsConfig from "../config.js";
 
 const handleChildOutput = (data, res) => {
 	const output = data.toString().trim();
@@ -61,7 +43,7 @@ const connectAlt = (altName, res) => {
 		res.status(400).send(`${altName} is already online!`);
 		console.log(`Tried to start ${altName}, but it is already online!`);
 	} else {
-		const child = spawn("node", ["alt_logic.js"], {
+		const child = spawn("node", ["./alt-logic.js"], {
 			env: {
 				USER: altsConfig[altName].username,
 				PASSWORD: altsConfig[altName].password,

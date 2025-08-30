@@ -1,6 +1,6 @@
 import { WebhookClient } from "discord.js";
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: "../../.env" });
 
 const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
@@ -20,15 +20,15 @@ if (!webhookUrl) {
 	 * thank you gemini for formatting my errors
 	 */
 	const formatArgument = (arg) => {
-		// if the argument is a formal Error, return its stack trace for debugging.
+		// if the argument is a formal Error, return its stack trace for debugging
 		if (arg instanceof Error) {
 			return arg.stack;
 		}
-		// if it's an object (but not null), format it as a readable JSON string.
+		// if it's an object (but not null), format it as a readable JSON string
 		if (typeof arg === "object" && arg !== null) {
 			return JSON.stringify(arg, null, 2);
 		}
-		// otherwise, just return it as is.
+		// otherwise, just return it as is
 		return arg;
 	};
 
@@ -40,7 +40,7 @@ if (!webhookUrl) {
 			// thank gemini for the regex
 			const chunks = message.match(/[\s\S]{1,1990}/g) || [];
 			for (const chunk of chunks) {
-				webhookClient.send("```\n" + chunk + "\n```").catch((err) => {
+				webhookClient.send("\n" + chunk + "\n").catch((err) => {
 					originalError("Failed to send log chunk to webhook:", err);
 				});
 			}

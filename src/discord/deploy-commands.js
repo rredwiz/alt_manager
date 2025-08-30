@@ -7,7 +7,7 @@ import {
 	PermissionFlagsBits,
 } from "discord.js";
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: "../../.env" });
 
 const clientId = "1406148352051249202";
 const guildId = "1403758662140563496";
@@ -63,6 +63,9 @@ const commands = [
 				.setRequired(true)
 		),
 	// .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+	new SlashCommandBuilder()
+		.setName("start-all-alts")
+		.setDescription("Attempts to all the alt accounts simultaneously."),
 ].map((command) => command.toJSON());
 
 const rest = new REST({ version: "10" }).setToken(token);

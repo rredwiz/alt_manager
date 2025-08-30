@@ -1,6 +1,7 @@
 import mineflayer from "mineflayer";
 
 const USER = process.env.USER;
+const PASSWORD = process.env.PASSWORD;
 const ALT = process.env.ALT;
 
 // we use the 'or' check in case .env is empty
@@ -16,7 +17,8 @@ const options = {
 	host: "donutsmp.net",
 	auth: "microsoft",
 	username: USER,
-	version: "1.20.4",
+	password: PASSWORD,
+	version: "1.19.3",
 };
 
 let alt = null;

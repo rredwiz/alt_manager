@@ -2,7 +2,7 @@
 
 import { REST, Routes } from "discord.js";
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: "../../.env" });
 
 const clientId = "1406148352051249202";
 const guildId = "1403758662140563496";
@@ -10,7 +10,7 @@ const token = process.env.DISCORD_BOT_TOKEN;
 
 const rest = new REST({ version: "10" }).setToken(token);
 
-async function clearCommands() {
+(async () => {
 	try {
 		console.log("Started clearing application (/) commands.");
 
@@ -29,6 +29,4 @@ async function clearCommands() {
 	} catch (error) {
 		console.error("Failed to clear commands:", error);
 	}
-}
-
-clearCommands();
+})();

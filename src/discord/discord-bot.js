@@ -12,7 +12,7 @@ const client = new Client({
 });
 
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: "../../.env" });
 const TOKEN = process.env.DISCORD_BOT_TOKEN;
 
 const MANAGER_SERVER_URL = "http://localhost:3000";
@@ -113,6 +113,12 @@ async function handleStatus(interaction) {
 	}
 }
 
+async function connectAllAlts(interaction) {
+	await interaction.reply({
+		content: `Connecting all alts to the server...`,
+	});
+}
+
 client.on("interactionCreate", async (interaction) => {
 	if (!interaction.isChatInputCommand()) return;
 
@@ -122,6 +128,7 @@ client.on("interactionCreate", async (interaction) => {
 	if (commandName === "stop-alt") await disconnectAlt(interaction);
 	if (commandName === "status") await handleStatus(interaction);
 	if (commandName === "send-text") await sendMessage(interaction);
+	if (commandName === "start-all-alts") await connectAllAlts(interaction);
 });
 
 client.login(TOKEN);
