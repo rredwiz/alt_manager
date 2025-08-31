@@ -3,7 +3,6 @@ import mcprotocol from "minecraft-protocol";
 import socks from "socks";
 
 const USER = process.env.USER;
-const PASSWORD = process.env.PASSWORD;
 const ALT = process.env.ALT;
 const PROXY_USER = process.env.PROXY_USER;
 const PROXY_PASSWORD = process.env.PROXY_PASSWORD;
@@ -75,8 +74,13 @@ alt = mineflayer.createBot({
 });
 
 alt.once("login", () => {
+	const loginTime = new Date();
+	const ign = alt.username;
+
 	const loginData = {
 		type: "login",
+		loginTime: loginTime,
+		ign: ign,
 		alt: ALT,
 	};
 	process.stdout.write(JSON.stringify(loginData) + "\n");

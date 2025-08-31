@@ -9,6 +9,7 @@ app.use(express.json());
 const port = 3000;
 
 const altProcesses = {};
+const altStatuses = {};
 const onlineAlts = new Set();
 
 import altsConfig from "../config.js";
@@ -19,10 +20,16 @@ const handleChildOutput = (data, res) => {
 	try {
 		const eventData = JSON.parse(output);
 		const altName = eventData.alt;
+
 		if (eventData.type === "login") {
 			console.log(`${altName} logged in successfully`);
 			res.status(200).send(`${altName} was connected successfully.`);
 			onlineAlts.add(altName);
+			altStatuses[altName] = {
+				status: "online",
+				loginTime: eventData.loginTime,
+				ign: eventData.ign,
+			};
 		} else if (eventData.type === "disconnect") {
 			console.log(`${altName} disconnected from the server`);
 			onlineAlts.delete(altName);

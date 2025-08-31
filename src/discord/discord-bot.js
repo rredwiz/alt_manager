@@ -44,7 +44,7 @@ async function connectAlt(interaction) {
 			`${altName} successfully connected but response text was null.`
 		);
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 		return interaction.editReply(
 			`Something went wrong, ${altName} failed to connect (check console).`
 		);
@@ -74,7 +74,7 @@ async function disconnectAlt(interaction) {
 			`${altName} successfully disconnected but response text was null.`
 		);
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 		return interaction.editReply(
 			`Something went wrong, ${altName} failed to disconnect (check console).`
 		);
