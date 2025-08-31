@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Status } from "discord.js";
+import { Client, EmbedBuilder, GatewayIntentBits, Status } from "discord.js";
 import fetch from "node-fetch";
 import AbortController from "abort-controller";
 
@@ -39,24 +39,26 @@ async function connectAlt(interaction) {
 			throw new Error(`failed to start connection for ${altName}`);
 		}
 
-		console.log("entering loop");
+		let statuses = null;
+
 		let isOnline = false;
 		for (let i = 0; i < 5; i++) {
 			const statusResponse = await fetch(`${MANAGER_SERVER_URL}/status`);
-			const statuses = await statusResponse.json();
+			statuses = await statusResponse.json();
 
 			if (statuses[altName]?.status === "online") {
 				isOnline = true;
-				console.log(`bot is online`);
 				break;
 			}
 
 			console.log("sleeping for 2000ms for retry");
 			await sleep(2000);
 		}
-		console.log("past loop");
 
-		if (isOnline) return interaction.editReply(`worked`);
+		if (isOnline)
+			return interaction.editReply(
+				`Successfully logged ${altName} in as ${statuses[altName].ign}.`
+			);
 		return interaction.editReply(`not worked`);
 	} catch (error) {
 		console.error(error);
@@ -138,8 +140,27 @@ async function handleStatus(interaction) {
 			signal: controller.signal,
 		});
 		const data = await response.json();
-		const onlineList = data.online;
-		interaction.editReply(`Online alts: ${onlineList}`);
+
+		let descLines = "";
+
+		for (const altName in data) {
+			const altData = data[altName];
+
+			const indicator = altData.status === "online" ? "🟢" : "🔴";
+			const timeDesc =
+				altData.status === "online"
+					? `Uptime: x hours`
+					: `Last Online: x hours ago`;
+
+			descLines += `${indicator} **${altName}** (${altData.ign}) - ${timeDesc}\n`;
+		}
+
+		const statusEmbed = new EmbedBuilder()
+			.setColor("#888888")
+			.setTitle("Alt Status Report")
+			.setDescription(`Live status for all ruby alts.\n\n${descLines}`);
+
+		interaction.editReply({ embeds: [statusEmbed] });
 	} catch (error) {
 		console.error(error);
 		interaction.editReply(

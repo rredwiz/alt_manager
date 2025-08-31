@@ -53,6 +53,8 @@ const handleChildMessage = (message) => {
 			break;
 		case "disconnect":
 			console.log(`${altName} was disconnected`);
+			// niche cases, sometimes the client disconnects without being kicked
+			if (altProcesses[altName]) delete altProcesses[altName];
 			altStatuses[altName] = {
 				...altStatuses[altName],
 				status: "offline",
@@ -119,7 +121,7 @@ app.get("/connect/:altName", (req, res) => {
 		});
 	}
 
-	if (altProcesses[altName]) {
+	if (altStatuses[altName].status !== "offline") {
 		res.status(400).send(`${altName} is already online!`);
 		console.log(`Tried to start ${altName}, but it is already online!`);
 	}
