@@ -88,7 +88,7 @@ async function sendMessage(interaction) {
 	const messageToSend = interaction.options.getString("send");
 	await interaction.deferReply();
 
-	const controller = AbortController();
+	const controller = new AbortController();
 	const timeoutId = setTimeout(() => controller.abort(), 15000);
 
 	try {
@@ -117,7 +117,7 @@ async function sendMessage(interaction) {
 async function handleStatus(interaction) {
 	await interaction.deferReply();
 
-	const controller = AbortController();
+	const controller = new AbortController();
 	const timeoutId = setTimeout(() => controller.abort(), 15000);
 
 	try {
