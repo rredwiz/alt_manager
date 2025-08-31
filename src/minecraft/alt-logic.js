@@ -26,7 +26,6 @@ const client = mcprotocol.createClient({
 	host: SERVER_HOST,
 	port: SERVER_PORT,
 	username: USER,
-	password: PASSWORD,
 	version: MC_VERSION,
 	auth: "microsoft",
 	connect: (client) => {
@@ -60,10 +59,6 @@ const client = mcprotocol.createClient({
 	},
 });
 
-const options = {
-	client: client,
-};
-
 let alt = null;
 
 // alt input handling for chatting (basically just chats whatever it's given rn)
@@ -75,7 +70,9 @@ process.stdin.on("data", (data) => {
 	}
 });
 
-alt = mineflayer.createBot(options);
+alt = mineflayer.createBot({
+	client: client,
+});
 
 alt.once("login", () => {
 	const loginData = {

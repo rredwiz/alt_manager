@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import fetch from "node-fetch";
+import AbortController from "abort-controller";
 
 const client = new Client({
 	intents: [
@@ -23,12 +24,15 @@ client.on("clientReady", async () => {
 
 async function connectAlt(interaction) {
 	const altName = interaction.options.getString("alt-name");
-	await interaction.reply({
-		content: `Connecting ${altName} to the server...`,
-	});
+	await interaction.deferReply();
+
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), 15000);
+
 	try {
 		const response = await fetch(
-			`${MANAGER_SERVER_URL}/connect/${altName}`
+			`${MANAGER_SERVER_URL}/connect/${altName}`,
+			{ signal: controller.signal }
 		);
 		const text = await response.text();
 		if (text) {
@@ -44,17 +48,22 @@ async function connectAlt(interaction) {
 		return interaction.editReply(
 			`Something went wrong, ${altName} failed to connect (check console).`
 		);
+	} finally {
+		clearTimeout(timeoutId);
 	}
 }
 
 async function disconnectAlt(interaction) {
 	const altName = interaction.options.getString("alt-name");
-	await interaction.reply({
-		content: `Disconnecting ${altName} from the server...`,
-	});
+	await interaction.deferReply();
+
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), 15000);
+
 	try {
 		const response = await fetch(
-			`${MANAGER_SERVER_URL}/disconnect/${altName}`
+			`${MANAGER_SERVER_URL}/disconnect/${altName}`,
+			{ signal: controller.signal }
 		);
 		const text = await response.text();
 		if (text) {
@@ -69,15 +78,19 @@ async function disconnectAlt(interaction) {
 		return interaction.editReply(
 			`Something went wrong, ${altName} failed to disconnect (check console).`
 		);
+	} finally {
+		clearTimeout(timeoutId);
 	}
 }
 
 async function sendMessage(interaction) {
 	const altName = interaction.options.getString("alt-name");
 	const messageToSend = interaction.options.getString("send");
-	await interaction.reply({
-		content: `Attempting to make ${altName} send message: ${messageToSend}...`,
-	});
+	await interaction.deferReply();
+
+	const controller = AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), 15000);
+
 	try {
 		const response = await fetch(`${MANAGER_SERVER_URL}/send/${altName}`, {
 			method: "POST",
@@ -85,6 +98,7 @@ async function sendMessage(interaction) {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({ message: messageToSend }),
+			signal: controller.signal,
 		});
 		const data = await response.json();
 		interaction.editReply(
@@ -95,13 +109,21 @@ async function sendMessage(interaction) {
 		interaction.editReply(
 			`An error occurred, ${altName} could not send "${messageToSend}"`
 		);
+	} finally {
+		clearTimeout(timeoutId);
 	}
 }
 
 async function handleStatus(interaction) {
-	await interaction.reply({ content: `Retrieving alt status...` });
+	await interaction.deferReply();
+
+	const controller = AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), 15000);
+
 	try {
-		const response = await fetch(`${MANAGER_SERVER_URL}/status`);
+		const response = await fetch(`${MANAGER_SERVER_URL}/status`, {
+			signal: controller.signal,
+		});
 		const data = await response.json();
 		const onlineList = data.online;
 		interaction.editReply(`Online alts: ${onlineList}`);
@@ -110,11 +132,13 @@ async function handleStatus(interaction) {
 		interaction.editReply(
 			`An error occurred, couldn't retrieve alt status.`
 		);
+	} finally {
+		clearTimeout(timeoutId);
 	}
 }
 
 async function connectAllAlts(interaction) {
-	await interaction.reply({
+	await interaction.deferReply({
 		content: `Connecting all alts to the server...`,
 	});
 }
