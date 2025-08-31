@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits } from "discord.js";
+import { Client, GatewayIntentBits, Status } from "discord.js";
 import fetch from "node-fetch";
 import AbortController from "abort-controller";
 
@@ -22,34 +22,47 @@ client.on("clientReady", async () => {
 	console.log("discord bot is logged in");
 });
 
+// sleep helper
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function connectAlt(interaction) {
 	const altName = interaction.options.getString("alt-name");
+	console.log(`attempting to connect ${altName}`);
 	await interaction.deferReply();
-
-	const controller = new AbortController();
-	const timeoutId = setTimeout(() => controller.abort(), 15000);
 
 	try {
 		const response = await fetch(
-			`${MANAGER_SERVER_URL}/connect/${altName}`,
-			{ signal: controller.signal }
+			`${MANAGER_SERVER_URL}/connect/${altName}`
 		);
-		const text = await response.text();
-		if (text) {
-			console.log(text);
-			console.log(`connect command successfully started ${altName}`);
-			return interaction.editReply(text);
+
+		if (!response.ok) {
+			throw new Error(`failed to start connection for ${altName}`);
 		}
-		return interaction.editReply(
-			`${altName} successfully connected but response text was null.`
-		);
+
+		console.log("entering loop");
+		let isOnline = false;
+		for (let i = 0; i < 5; i++) {
+			const statusResponse = await fetch(`${MANAGER_SERVER_URL}/status`);
+			const statuses = await statusResponse.json();
+
+			if (statuses[altName]?.status === "online") {
+				isOnline = true;
+				console.log(`bot is online`);
+				break;
+			}
+
+			console.log("sleeping for 2000ms for retry");
+			await sleep(2000);
+		}
+		console.log("past loop");
+
+		if (isOnline) return interaction.editReply(`worked`);
+		return interaction.editReply(`not worked`);
 	} catch (error) {
 		console.error(error);
 		return interaction.editReply(
 			`Something went wrong, ${altName} failed to connect (check console).`
 		);
-	} finally {
-		clearTimeout(timeoutId);
 	}
 }
 

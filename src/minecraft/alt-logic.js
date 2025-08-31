@@ -62,10 +62,9 @@ let alt = null;
 
 // alt input handling for chatting (basically just chats whatever it's given rn)
 // ill probably make this a json object later but im lazy
-process.stdin.on("data", (data) => {
-	if (alt) {
-		const message = data.toString().trim();
-		alt.chat(message);
+process.on("message", (message) => {
+	if (alt && message.type === "chat") {
+		alt.chat(message.message);
 	}
 });
 
@@ -74,16 +73,12 @@ alt = mineflayer.createBot({
 });
 
 alt.once("login", () => {
-	const loginTime = new Date();
-	const ign = alt.username;
-
-	const loginData = {
+	process.send({
 		type: "login",
-		loginTime: loginTime,
-		ign: ign,
+		loginTime: new Date(),
+		ign: alt.username,
 		alt: ALT,
-	};
-	process.stdout.write(JSON.stringify(loginData) + "\n");
+	});
 });
 
 const tpaRegex = /(\w+) sent you a tpa request/i;
@@ -116,26 +111,21 @@ alt.on("chat:tpaRequest", (matches) => {
 	}
 });
 
-alt.on("kicked", (reason, loggedIn) => {
-	const kickReason = JSON.stringify(reason);
-	const kickedData = {
+alt.on("kicked", (reason) => {
+	process.send({
 		type: "kicked",
-		reason: kickReason,
-		loggedIn: loggedIn,
+		reason: JSON.stringify(reason),
 		alt: ALT,
-	};
-	process.stdout.write(JSON.stringify(kickedData));
-	process.stderr.write(`alt was kicked with kick reason ${kickReason}`);
+	});
 });
 
 alt.on("error", (error) => {
-	process.stderr.write(`bot responded with error: ${error}`);
+	process.stderr.write(`bot responded with error: ${error.message}\n`);
 });
 
 alt.on("end", () => {
-	const disconnectedData = {
+	process.send({
 		type: "disconnect",
 		alt: ALT,
-	};
-	process.stdout.write(JSON.stringify(disconnectedData) + "\n");
+	});
 });
