@@ -60,6 +60,18 @@ const client = mcprotocol.createClient({
 
 let alt = null;
 
+// let pollingInterval = null;
+
+// function pollData() {
+// 	if (!alt) return;
+
+// 	const polledData = {
+
+// 	};
+
+// 	if (process.send) process.send(pollData);
+// }
+
 // alt input handling for chatting (basically just chats whatever it's given rn)
 // ill probably make this a json object later but im lazy
 process.on("message", (message) => {

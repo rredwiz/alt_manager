@@ -129,6 +129,26 @@ async function sendMessage(interaction) {
 	}
 }
 
+// helper for status to handle uptime and downtime
+function formatDuration(timestampString) {
+	if (!timestampString) return "N/A";
+
+	const startTime = new Date(timestampString);
+	const durationMs = new Date() - startTime;
+
+	const hours = Math.floor(durationMs / (1000 * 60 * 60));
+	const minutes = Math.floor((durationMs / (1000 * 60)) % 60);
+
+	let parts = [];
+	if (hours > 0) parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
+	if (minutes > 0 && hours < 1)
+		parts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
+
+	if (parts.length === 0) return "Just now";
+	if (parts.length === 1) return parts;
+	return parts.join(", ");
+}
+
 async function handleStatus(interaction) {
 	await interaction.deferReply();
 
@@ -142,15 +162,18 @@ async function handleStatus(interaction) {
 		const data = await response.json();
 
 		let descLines = "";
+		const offlineEmoji = "<:1191031707126743173:1411889615627091968>";
+		const onlineEmoji = "<:1191031705495154730:1411889613982662828>";
 
 		for (const altName in data) {
 			const altData = data[altName];
 
-			const indicator = altData.status === "online" ? "🟢" : "🔴";
+			const indicator =
+				altData.status === "online" ? onlineEmoji : offlineEmoji;
 			const timeDesc =
 				altData.status === "online"
-					? `Uptime: x hours`
-					: `Last Online: x hours ago`;
+					? `Uptime: \`${formatDuration(altData.loginTime)}\``
+					: `Downtime: \`${formatDuration(altData.lastDisconnect)}\``;
 
 			descLines += `${indicator} **${altName}** (${altData.ign}) - ${timeDesc}\n`;
 		}
@@ -158,7 +181,17 @@ async function handleStatus(interaction) {
 		const statusEmbed = new EmbedBuilder()
 			.setColor("#888888")
 			.setTitle("Alt Status Report")
-			.setDescription(`Live status for all ruby alts.\n\n${descLines}`);
+			.setThumbnail(
+				"https://cdn.discordapp.com/attachments/1408601764428513353/1411900234757574666/pngimg.com_-_ruby_PNG44.png?ex=68b6560f&is=68b5048f&hm=1ff1120d97207826cc5c5d0077a796e6dfcb14a2de77baacc865b6f18cccbc4b&"
+			)
+			.setDescription(
+				`Showing live status for all ruby alts.\n\n${descLines}`
+			)
+			.setFooter({
+				text: `Requested Status by ${interaction.user.username}`,
+				iconURL: interaction.user.displayAvatarURL(),
+			})
+			.setTimestamp();
 
 		interaction.editReply({ embeds: [statusEmbed] });
 	} catch (error) {
