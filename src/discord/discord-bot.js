@@ -59,7 +59,9 @@ async function connectAlt(interaction) {
 			return interaction.editReply(
 				`Successfully logged ${altName} in as ${statuses[altName].ign}.`
 			);
-		return interaction.editReply(`not worked`);
+		return interaction.editReply(
+			`${altName} connection timed out, something went wrong (check console).`
+		);
 	} catch (error) {
 		console.error(error);
 		return interaction.editReply(
