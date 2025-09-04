@@ -1,6 +1,5 @@
 import mineflayer from "mineflayer";
-import mcprotocol from "minecraft-protocol";
-import socks from "socks";
+import { ProxyAgent } from "proxy-agent";
 
 const USER = process.env.USER;
 const ALT = process.env.ALT;
@@ -21,45 +20,13 @@ if (!trustedUsersString)
 
 const trustedUsers = new Set(trustedUsersString.split(","));
 
-const client = mcprotocol.createClient({
-	host: SERVER_HOST,
-	port: SERVER_PORT,
-	username: USER,
-	version: MC_VERSION,
-	auth: "microsoft",
-	connect: (client) => {
-		socks.SocksClient.createConnection(
-			{
-				proxy: {
-					type: 5,
-					userId: PROXY_USER,
-					password: PROXY_PASSWORD,
-					host: PROXY_HOST,
-					port: PROXY_PORT,
-				},
-				command: "connect",
-				destination: {
-					host: SERVER_HOST,
-					port: SERVER_PORT,
-				},
-			},
-			(err, info) => {
-				if (err) {
-					process.stderr.write(`SOCKS connection error: ${err}`);
-					client.emit("error", err);
-					return;
-				}
-
-				process.stderr.write(`SOCKS tunnel established, connecting...`);
-				client.setSocket(info.socket);
-				client.emit("connect");
-			}
-		);
-	},
-});
+const proxyUrl = `socks5://${PROXY_USER}:${PROXY_PASSWORD}@${PROXY_HOST}:${PROXY_PORT}`;
+const agent = new ProxyAgent(proxyUrl);
 
 let alt = null;
 
+// TODO:
+///////////////////////
 // let pollingInterval = null;
 
 // function pollData() {
@@ -71,6 +38,7 @@ let alt = null;
 
 // 	if (process.send) process.send(pollData);
 // }
+///////////////////////
 
 // alt input handling for chatting (basically just chats whatever it's given rn)
 // ill probably make this a json object later but im lazy
@@ -81,7 +49,12 @@ process.on("message", (message) => {
 });
 
 alt = mineflayer.createBot({
-	client: client,
+	host: SERVER_HOST,
+	port: SERVER_PORT,
+	username: USER,
+	version: MC_VERSION,
+	auth: "microsoft",
+	agent: agent,
 });
 
 alt.once("login", () => {
