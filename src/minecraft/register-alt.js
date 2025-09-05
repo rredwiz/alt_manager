@@ -1,8 +1,8 @@
 /* 
-	this file is for registering new alts because they dont work with proxies
-	argument after file is the user, next is the server host
-	usage: node ./register-alt.js <user> <server> 
-	if the port doesn't work try a different server :sob: (im lazy)
+	This file is for registering new alts because they dont work with proxies.
+	Argument after file is the user, next is the server host.
+	Usage: node ./register-alt.js <user> <server>
+	If the port doesn't work try a different server :sob: (im lazy)
 */
 
 import mineflayer from "mineflayer";
@@ -26,11 +26,13 @@ const alt = mineflayer.createBot({
 });
 
 alt.once("login", () => {
-	console.log(`${alt.username} logged in successfully.`);
+	console.log(
+		`${alt.username} was logged in successfully after registering.`
+	);
 });
 
 alt.on("kicked", (reason) => {
-	console.log(`${alt.username} was kicked from the server.`);
+	console.log(`Alt was kicked from the server for reason: ${reason}.`);
 });
 
 alt.on("error", (error) => {
