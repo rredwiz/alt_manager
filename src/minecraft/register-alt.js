@@ -32,7 +32,9 @@ alt.once("login", () => {
 });
 
 alt.on("kicked", (reason) => {
-	console.log(`Alt was kicked from the server for reason: ${reason}.`);
+	console.log(
+		`Alt was kicked from the server for reason: ${JSON.stringify(reason)}.`
+	);
 });
 
 alt.on("error", (error) => {

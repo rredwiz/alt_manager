@@ -11,7 +11,6 @@ const SERVER_HOST = "donutsmp.net";
 const SERVER_PORT = 25565;
 const MC_VERSION = "1.19.3";
 
-// we use the 'or' check in case .env is empty
 const trustedUsersString = process.env.TRUSTED_USERS || "";
 if (!trustedUsersString)
 	process.stderr.write(
