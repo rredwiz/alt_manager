@@ -63,6 +63,9 @@ const handleChildMessage = (message) => {
 				disconnectReason: "forced disconnect",
 			};
 			break;
+		case "death":
+			console.log(`${altName} died`);
+			break;
 	}
 };
 

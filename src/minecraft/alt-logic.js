@@ -103,6 +103,13 @@ alt.on("kicked", (reason) => {
 	});
 });
 
+alt.on("death", () => {
+	process.send({
+		type: "death",
+		alt: ALT,
+	});
+});
+
 alt.on("error", (error) => {
 	process.stderr.write(`bot responded with error: ${error.message}\n`);
 });
