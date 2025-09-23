@@ -18,7 +18,6 @@ const commands = [
 	new SlashCommandBuilder()
 		.setName("status")
 		.setDescription("Returns a list of the alts that are online."),
-	// .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	new SlashCommandBuilder()
 		.setName("start-alt")
 		.setDescription("Starts a specific alt.")
@@ -30,7 +29,6 @@ const commands = [
 				)
 				.setRequired(true)
 		),
-	// .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	new SlashCommandBuilder()
 		.setName("stop-alt")
 		.setDescription("Stops a specific alt.")
@@ -42,7 +40,6 @@ const commands = [
 				)
 				.setRequired(true)
 		),
-	// .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	new SlashCommandBuilder()
 		.setName("send-text")
 		.setDescription("Make a specified alt send a message or command.")
@@ -62,7 +59,6 @@ const commands = [
 				)
 				.setRequired(true)
 		),
-	// .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	new SlashCommandBuilder()
 		.setName("start-all-alts")
 		.setDescription("Attempts to all the alt accounts simultaneously."),
