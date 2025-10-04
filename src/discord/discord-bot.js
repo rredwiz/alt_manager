@@ -42,7 +42,7 @@ async function connectAlt(interaction) {
 		let statuses = null;
 
 		let isOnline = false;
-		for (let i = 0; i < 5; i++) {
+		for (let i = 0; i < 15; i++) {
 			const statusResponse = await fetch(`${MANAGER_SERVER_URL}/status`);
 			statuses = await statusResponse.json();
 
